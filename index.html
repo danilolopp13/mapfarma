@@ -245,6 +245,7 @@ function renderTabPainel(){
       <select id="s-assessor" onchange="filterP()">${aOpts}</select>
       <select id="s-div" onchange="filterP()"><option value="">Todas as divisões</option><option value="A">Divisão A</option><option value="B">Divisão B</option></select>
       <select id="s-status" onchange="filterP()"><option value="">Todos os status</option><option value="done">Visitados</option><option value="pending">Pendentes</option></select>
+      <button onclick="exportExcel()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;">⬇ Exportar Excel</button>
     </div>
     <div class="table-wrap"><table class="vtable">
       <thead><tr><th>Farmácia</th><th>Divisão</th><th>Assessor</th><th>Responsável</th><th>Porte</th><th>Status</th></tr></thead>
@@ -582,6 +583,28 @@ async function saveVisit(clienteId){
     const b=document.getElementById('sbadge'); b.style.display='flex';
     setTimeout(()=>b.style.display='none',2500);
   } catch(e){ alert('Erro: '+e.message); btn.disabled=false; btn.textContent='Salvar visita'; }
+}
+
+function exportExcel(){
+  const rows=[['Farmácia','Bairro','Cidade','UF','Rede','CEP','Divisão','Assessor','Responsável','Telefone','Porte','Observações','Status','Data visita']];
+  allClients.forEach(c=>{
+    const v=allVisits[c.id];
+    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'':'' ;
+    const data=v&&v.updatedAt?new Date(v.updatedAt.seconds*1000).toLocaleDateString('pt-BR'):'';
+    rows.push([
+      c.nome||'', c.bairro||'', c.cidade||'', c.uf||'', c.rede||'', c.cep||'',
+      c.lado||'', an,
+      v?v.responsavel||'':'', v?v.telefone||'':'', v?v.porte||'':'', v?v.obs||'':'',
+      v?'Visitado':'Pendente', data
+    ]);
+  });
+  const ws=rows.map(r=>r.map(c=>typeof c==='string'&&c.includes(',')?`"${c}"`:c).join(',')).join('\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+ws],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`farmavisitas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
 document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('auth-screen')?.style.display!=='none') doLogin(); });
