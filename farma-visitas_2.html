@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmaVisitas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+  :root {
+    --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#085041;
+    --gray:#888780;--gray-light:#F1EFE8;--border:#D3D1C7;
+    --text:#2C2C2A;--text-muted:#5F5E5A;--bg:#F8F7F3;--white:#FFFFFF;
+    --danger:#E24B4A;--amber:#BA7517;--amber-light:#FAEEDA;
+    --blue:#185FA5;--blue-light:#E6F1FB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;}
+  #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;}
+  .auth-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:380px;}
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;}
+  .logo-icon{width:40px;height:40px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+  .logo-icon svg{width:22px;height:22px;fill:white;}
+  .logo-text{font-size:20px;font-weight:600;}
+  .logo-sub{font-size:12px;color:var(--text-muted);letter-spacing:.05em;}
+  .auth-title{font-size:18px;font-weight:600;margin-bottom:.25rem;}
+  .auth-sub{font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;}
+  label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:4px;margin-top:14px;}
+  input[type=email],input[type=password],input[type=text],input[type=tel],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:15px;color:var(--text);background:var(--white);outline:none;transition:border-color .15s;}
+  input:focus,select:focus,textarea:focus{border-color:var(--green);}
+  textarea{resize:vertical;min-height:80px;}
+  .btn-primary{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--green);color:white;width:100%;padding:12px;margin-top:1.5rem;font-size:15px;border:none;border-radius:8px;font-family:inherit;font-weight:500;cursor:pointer;}
+  .btn-primary:hover{opacity:.9;}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+  .error-msg{color:var(--danger);font-size:13px;margin-top:10px;display:none;}
+  #app-screen{display:none;min-height:100vh;flex-direction:column;}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .topbar-logo{display:flex;align-items:center;gap:8px;}
+  .topbar-logo .li{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+  .topbar-logo .li svg{width:18px;height:18px;fill:white;}
+  .topbar-logo span{font-weight:600;font-size:16px;}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .user-chip{font-size:13px;color:var(--text-muted);}
+  .badge-role{font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;}
+  .badge-gestor{background:var(--amber-light);color:var(--amber);}
+  .badge-assessor{background:var(--green-light);color:var(--green-dark);}
+  .btn-logout{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:4px 8px;border-radius:6px;}
+  .btn-logout:hover{background:var(--gray-light);color:var(--text);}
+  .main-content{flex:1;padding:1.5rem 1.25rem;max-width:820px;margin:0 auto;width:100%;}
+  .tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);}
+  .tab{padding:10px 16px;font-size:14px;font-weight:500;color:var(--text-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s;}
+  .tab.active{color:var(--green);border-bottom-color:var(--green);}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+  .stat-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;}
+  .stat-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .stat-value{font-size:26px;font-weight:600;}
+  .stat-value.green{color:var(--green);}
+  .stat-value.amber{color:var(--amber);}
+  .progress-bar-wrap{background:var(--border);border-radius:20px;height:6px;margin-bottom:1.25rem;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:var(--green);border-radius:20px;transition:width .4s;}
+  .progress-label{font-size:13px;color:var(--text-muted);margin-bottom:4px;}
+  .filter-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;}
+  .filter-row select{width:auto;flex:1;min-width:130px;}
+  .filter-row input{flex:2;min-width:160px;}
+  .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .vtable{width:100%;border-collapse:collapse;font-size:14px;}
+  .vtable th{text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--bg);}
+  .vtable td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  .vtable tr:last-child td{border-bottom:none;}
+  .vtable tr:hover td{background:var(--gray-light);}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:500;}
+  .pill-done{background:var(--green-light);color:var(--green-dark);}
+  .pill-pending{background:var(--gray-light);color:var(--gray);}
+  .pill-a{background:var(--blue-light);color:var(--blue);}
+  .pill-b{background:var(--amber-light);color:var(--amber);}
+  .config-area{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+  .config-title{font-size:14px;font-weight:600;margin-bottom:.5rem;}
+  .config-hint{font-size:13px;color:var(--text-muted);margin-bottom:.75rem;line-height:1.6;}
+  .btn-config{background:var(--green);color:white;padding:10px 18px;border-radius:8px;border:none;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px;}
+  .btn-config:hover{opacity:.9;}
+  .div-tabs{display:flex;gap:6px;margin-bottom:1rem;}
+  .div-tab{padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:all .15s;}
+  .div-tab.act-a{background:var(--blue-light);border-color:var(--blue);color:var(--blue);}
+  .div-tab.act-b{background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
+  .div-tab.act-s{background:var(--gray-light);border-color:var(--gray);color:var(--gray);}
+  .assign-bar{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .assign-bar label{margin:0;font-size:14px;font-weight:500;color:var(--text);}
+  .assign-bar select{width:auto;flex:1;min-width:180px;}
+  .btn-assign{background:var(--green);color:white;padding:9px 20px;border-radius:8px;border:none;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;}
+  .btn-assign:hover{opacity:.9;}
+  .client-list{display:flex;flex-direction:column;gap:8px;}
+  .client-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;}
+  .client-card:hover{border-color:var(--green);}
+  .client-card.done{border-left:3px solid var(--green);}
+  .client-name{font-weight:500;font-size:15px;}
+  .client-meta{font-size:13px;color:var(--text-muted);margin-top:2px;}
+  .sdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-left:12px;}
+  .dot-p{background:var(--border);}
+  .dot-d{background:var(--green);}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:14px;background:none;border:none;cursor:pointer;margin-bottom:1.25rem;padding:0;}
+  .back-btn:hover{color:var(--text);}
+  .detail-name{font-size:22px;font-weight:600;}
+  .detail-sub{font-size:14px;color:var(--text-muted);margin-top:2px;margin-bottom:1.5rem;}
+  .form-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;}
+  .size-btn{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--white);font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--text-muted);}
+  .size-btn:hover{border-color:var(--green);color:var(--green);}
+  .size-btn.sel{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
+  .btn-save{background:var(--green);color:white;width:100%;padding:13px;font-size:15px;margin-top:.5rem;border-radius:10px;border:none;font-family:inherit;font-weight:500;cursor:pointer;}
+  .btn-save:hover{opacity:.9;}
+  .saved-badge{display:none;align-items:center;gap:6px;color:var(--green);font-size:14px;font-weight:500;background:var(--green-light);padding:8px 14px;border-radius:8px;margin-top:8px;}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-full{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:15px;}
+</style>
+</head>
+<body>
+
+<div id="loading-screen" class="loading-full">
+  <div class="spinner" style="border-color:var(--border);border-top-color:var(--green);width:32px;height:32px;border-width:3px;"></div>
+</div>
+
+<div id="auth-screen" style="display:none;">
+  <div class="auth-card">
+    <div class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 3.18 2.07 5.85 5 6.74V20h4v-4.26c2.93-.89 5-3.56 5-6.74 0-3.87-3.13-7-7-7zm0 11c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg></div>
+      <div><div class="logo-text">FarmaVisitas</div><div class="logo-sub">GESTÃO DE VISITAS</div></div>
+    </div>
+    <div class="auth-title">Entrar</div>
+    <div class="auth-sub">Use seu e-mail e senha cadastrados.</div>
+    <label>E-mail</label><input type="email" id="auth-email" placeholder="seu@email.com"/>
+    <label>Senha</label><input type="password" id="auth-pass" placeholder="••••••••"/>
+    <div class="error-msg" id="auth-error"></div>
+    <button class="btn-primary" onclick="doLogin()" id="btn-login">Entrar</button>
+  </div>
+</div>
+
+<div id="app-screen" style="display:none;flex-direction:column;">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="li"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 3.18 2.07 5.85 5 6.74V20h4v-4.26c2.93-.89 5-3.56 5-6.74 0-3.87-3.13-7-7-7zm0 11c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg></div>
+      <span>FarmaVisitas</span>
+    </div>
+    <div class="topbar-right">
+      <span class="user-chip" id="topbar-user"></span>
+      <span class="badge-role" id="topbar-role"></span>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="main-content" id="main-content"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDm6m6ESUBFs1meqaPoumhnUCnl2rg6LCU",authDomain:"map-farma-4faf1.firebaseapp.com",projectId:"map-farma-4faf1",storageBucket:"map-farma-4faf1.firebasestorage.app",messagingSenderId:"617219254183",appId:"1:617219254183:web:d2d76d80c529f853e63882"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(), db=firebase.firestore();
+let currentUser=null,currentRole=null,allClients=[],allVisits={},allAssessores=[];
+
+auth.onAuthStateChanged(async user=>{
+  document.getElementById('loading-screen').style.display='none';
+  if(user){
+    currentUser=user;
+    const snap=await db.collection('usuarios').doc(user.uid).get();
+    if(snap.exists){
+      const data=snap.data(); currentRole=data.role;
+      document.getElementById('topbar-user').textContent=data.nome||user.email;
+      const re=document.getElementById('topbar-role');
+      re.textContent=currentRole==='gestor'?'Gestor':'Assessor';
+      re.className='badge-role '+(currentRole==='gestor'?'badge-gestor':'badge-assessor');
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('app-screen').style.display='flex';
+      await loadData();
+      if(currentRole==='gestor') renderGestor(); else renderAssessorList();
+    } else { auth.signOut(); showAE('Usuário não encontrado.'); }
+  } else {
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('app-screen').style.display='none';
+  }
+});
+
+async function doLogin(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  const btn=document.getElementById('btn-login');
+  if(!email||!pass) return showAE('Preencha e-mail e senha.');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Entrando...'; hideAE();
+  try{ await auth.signInWithEmailAndPassword(email,pass); }
+  catch(e){ showAE('E-mail ou senha incorretos.'); btn.disabled=false; btn.textContent='Entrar'; }
+}
+function doLogout(){ auth.signOut(); }
+function showAE(m){ const e=document.getElementById('auth-error'); e.textContent=m; e.style.display='block'; }
+function hideAE(){ document.getElementById('auth-error').style.display='none'; }
+
+async function loadData(){
+  const [cs,vs,us]=await Promise.all([
+    db.collection('clientes').orderBy('nome').get(),
+    db.collection('visitas').get(),
+    db.collection('usuarios').where('role','==','assessor').get()
+  ]);
+  allClients=cs.docs.map(d=>({id:d.id,...d.data()}));
+  allVisits={};
+  vs.docs.forEach(d=>{ const dt=d.data(); allVisits[dt.clienteId]={id:d.id,...dt}; });
+  allAssessores=us.docs.map(d=>({uid:d.id,...d.data()}));
+}
+
+// ===================== GESTOR =====================
+function renderGestor(){
+  document.getElementById('main-content').innerHTML=`
+    <div class="tabs">
+      <button class="tab active" id="tab-painel" onclick="switchTab('painel')">Painel</button>
+      <button class="tab" id="tab-divisao" onclick="switchTab('divisao')">Divisão da cidade</button>
+      <button class="tab" id="tab-clientes" onclick="switchTab('clientes')">Clientes</button>
+      <button class="tab" id="tab-config" onclick="switchTab('config')">Configurações</button>
+    </div>
+    <div id="tab-content"></div>`;
+  renderTabPainel();
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='painel') renderTabPainel();
+  else if(tab==='divisao') renderTabDivisao();
+  else if(tab==='clientes') renderTabClientes();
+  else renderTabConfig();
+}
+
+function renderTabPainel(){
+  const total=allClients.length, done=Object.keys(allVisits).length, pct=total?Math.round(done/total*100):0;
+  const aOpts='<option value="">Todos os assessores</option>'+allAssessores.map(a=>`<option value="${a.uid}">${a.nome}</option>`).join('');
+  document.getElementById('tab-content').innerHTML=`
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card"><div class="stat-label">Visitados</div><div class="stat-value green">${done}</div></div>
+      <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-value amber">${total-done}</div></div>
+    </div>
+    <p class="progress-label">${pct}% concluído</p>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    <div class="filter-row" style="margin-top:1.5rem">
+      <input type="text" id="s-search" placeholder="Buscar farmácia..." oninput="filterP()"/>
+      <select id="s-assessor" onchange="filterP()">${aOpts}</select>
+      <select id="s-div" onchange="filterP()"><option value="">Todas as divisões</option><option value="A">Divisão A</option><option value="B">Divisão B</option></select>
+      <select id="s-status" onchange="filterP()"><option value="">Todos os status</option><option value="done">Visitados</option><option value="pending">Pendentes</option></select>
+    </div>
+    <div class="table-wrap"><table class="vtable">
+      <thead><tr><th>Farmácia</th><th>Divisão</th><th>Assessor</th><th>Responsável</th><th>Porte</th><th>Status</th></tr></thead>
+      <tbody id="ptbody">${buildRows(allClients)}</tbody>
+    </table></div>`;
+}
+
+function buildRows(clients){
+  if(!clients.length) return '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum resultado</td></tr>';
+  return clients.map(c=>{
+    const v=allVisits[c.id];
+    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'—':'—';
+    const dp=c.lado==='A'?'<span class="pill pill-a">A</span>':c.lado==='B'?'<span class="pill pill-b">B</span>':'—';
+    return`<tr><td><strong>${c.nome}</strong><br><span style="color:var(--text-muted);font-size:12px">${c.bairro||''} ${c.uf?'· '+c.uf:''}</span></td>
+    <td>${dp}</td><td>${an}</td><td>${v?v.responsavel||'—':'—'}</td><td>${v?v.porte||'—':'—'}</td>
+    <td><span class="pill ${v?'pill-done':'pill-pending'}">${v?'Visitado':'Pendente'}</span></td></tr>`;
+  }).join('');
+}
+
+function filterP(){
+  const s=(document.getElementById('s-search')?.value||'').toLowerCase();
+  const af=document.getElementById('s-assessor')?.value||'';
+  const df=document.getElementById('s-div')?.value||'';
+  const sf=document.getElementById('s-status')?.value||'';
+  const f=allClients.filter(c=>{
+    if(s&&!c.nome.toLowerCase().includes(s)) return false;
+    if(df&&(c.lado||'')!==df) return false;
+    if(af&&c.assessorUid!==af) return false;
+    const v=allVisits[c.id];
+    if(sf==='done'&&!v) return false;
+    if(sf==='pending'&&v) return false;
+    return true;
+  });
+  document.getElementById('ptbody').innerHTML=buildRows(f);
+}
+
+// ---- DIVISÃO DA CIDADE ----
+function renderTabDivisao(){
+  const cA=allClients.filter(c=>(c.lado||'')==='A');
+  const cB=allClients.filter(c=>(c.lado||'')==='B');
+  const cS=allClients.filter(c=>!c.lado);
+  const aOpts='<option value="">-- Selecionar assessor --</option>'+allAssessores.map(a=>`<option value="${a.uid}">${a.nome}</option>`).join('');
+
+  document.getElementById('tab-content').innerHTML=`
+    <div style="margin-bottom:1rem">
+      <p style="font-weight:600;font-size:16px">Divisão da cidade</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:2px">Selecione a divisão e atribua um assessor responsável</p>
+    </div>
+    <div class="div-tabs">
+      <button class="div-tab act-a" id="dt-A" onclick="switchDT('A')">Divisão A <span style="font-size:12px;opacity:.8">(${cA.length} farmácias)</span></button>
+      <button class="div-tab" id="dt-B" onclick="switchDT('B')">Divisão B <span style="font-size:12px;opacity:.8">(${cB.length} farmácias)</span></button>
+      ${cS.length?`<button class="div-tab" id="dt-S" onclick="switchDT('S')">Sem divisão <span style="font-size:12px;opacity:.8">(${cS.length})</span></button>`:''}
+    </div>
+
+    <div id="assign-bar" class="assign-bar">
+      <label id="assign-label">Assessor responsável pela Divisão A:</label>
+      <select id="assign-select">${aOpts}</select>
+      <button class="btn-assign" onclick="assignDivisao()">Atribuir</button>
+    </div>
+
+    <div id="div-status" style="font-size:13px;margin-bottom:10px;min-height:20px"></div>
+
+    <div class="table-wrap"><table class="vtable">
+      <thead><tr><th>Farmácia</th><th>Bairro</th><th>Assessor atribuído</th><th>Status visita</th></tr></thead>
+      <tbody id="dtbody"></tbody>
+    </table></div>`;
+
+  window._curDT='A';
+  // Pre-select if already assigned
+  if(cA.length&&cA[0].assessorUid) document.getElementById('assign-select').value=cA[0].assessorUid;
+  renderDT('A');
+}
+
+function switchDT(d){
+  window._curDT=d;
+  document.querySelectorAll('.div-tab').forEach(t=>t.className='div-tab');
+  if(d==='A') document.getElementById('dt-A').className='div-tab act-a';
+  else if(d==='B') document.getElementById('dt-B').className='div-tab act-b';
+  else if(document.getElementById('dt-S')) document.getElementById('dt-S').className='div-tab act-s';
+
+  const bar=document.getElementById('assign-bar');
+  const lbl=document.getElementById('assign-label');
+  const sel=document.getElementById('assign-select');
+  if(d==='S'){ bar.style.display='none'; }
+  else {
+    bar.style.display='flex';
+    lbl.textContent=`Assessor responsável pela Divisão ${d}:`;
+    const clients=allClients.filter(c=>(c.lado||'')===d);
+    sel.value=clients.length&&clients[0].assessorUid?clients[0].assessorUid:'';
+  }
+  document.getElementById('div-status').innerHTML='';
+  renderDT(d);
+}
+
+function renderDT(d){
+  const clients=d==='S'?allClients.filter(c=>!c.lado):allClients.filter(c=>(c.lado||'')===d);
+  document.getElementById('dtbody').innerHTML=clients.map(c=>{
+    const v=allVisits[c.id];
+    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'—':'<span style="color:var(--text-muted)">Não atribuído</span>';
+    return`<tr><td><strong>${c.nome}</strong></td><td style="color:var(--text-muted)">${c.bairro||'—'}</td><td>${an}</td>
+    <td><span class="pill ${v?'pill-done':'pill-pending'}">${v?'Visitado':'Pendente'}</span></td></tr>`;
+  }).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhuma farmácia nesta divisão</td></tr>';
+}
+
+async function assignDivisao(){
+  const d=window._curDT;
+  if(d==='S') return;
+  const assessorUid=document.getElementById('assign-select').value;
+  if(!assessorUid) return alert('Selecione um assessor.');
+  const clients=allClients.filter(c=>(c.lado||'')===d);
+  if(!clients.length){ document.getElementById('div-status').innerHTML='<span style="color:var(--amber)">Nenhuma farmácia nessa divisão.</span>'; return; }
+  document.getElementById('div-status').innerHTML='<span style="color:var(--text-muted)">Atribuindo '+clients.length+' farmácias...</span>';
+  try{
+    for(let i=0;i<clients.length;i+=400){
+      const batch=db.batch();
+      clients.slice(i,i+400).forEach(c=>{ batch.update(db.collection('clientes').doc(c.id),{assessorUid}); c.assessorUid=assessorUid; });
+      await batch.commit();
+    }
+    const an=(allAssessores.find(a=>a.uid===assessorUid)||{}).nome||'';
+    document.getElementById('div-status').innerHTML=`<span style="color:var(--green)">✓ Divisão ${d} atribuída a <strong>${an}</strong> (${clients.length} farmácias)</span>`;
+    renderDT(d);
+  } catch(e){ document.getElementById('div-status').innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
+}
+
+// ---- CLIENTES ----
+function renderTabClientes(){
+  const semDiv=allClients.filter(c=>!c.lado).length;
+  document.getElementById('tab-content').innerHTML=`
+    <div class="config-area">
+      <div class="config-title">Importar lista de clientes (CSV)</div>
+      <div class="config-hint">Colunas esperadas: <strong>nome, cidade, uf, rede, bairro, cep, lado</strong><br>A coluna <strong>lado</strong> deve ser A ou B. Separador vírgula ou ponto e vírgula.</div>
+      <input type="file" id="csv-file" accept=".csv" onchange="previewCSV()"/>
+      <div id="csv-preview" style="margin-top:10px"></div>
+      <div id="csv-status" style="margin-top:8px;font-size:13px"></div>
+    </div>
+    <div class="config-area">
+      <div class="config-title">Clientes cadastrados (${allClients.length})</div>
+      ${semDiv?`<p style="font-size:13px;color:var(--amber);margin-bottom:10px">⚠ ${semDiv} farmácias sem divisão definida.</p>`:''}
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="sc-search" placeholder="Buscar..." oninput="filterCL()"/>
+        <select id="sc-lado" onchange="filterCL()" style="width:auto"><option value="">Todas as divisões</option><option value="A">A</option><option value="B">B</option></select>
+      </div>
+      <div id="cl-list" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">${renderCLHTML(allClients)}</div>
+    </div>`;
+}
+
+function renderCLHTML(clients){
+  if(!clients.length) return '<div style="color:var(--text-muted);font-size:14px;padding:1rem">Nenhum resultado.</div>';
+  return clients.map(c=>`
+    <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-weight:500;font-size:14px">${c.nome}</div><div style="font-size:12px;color:var(--text-muted)">${c.bairro||''} ${c.uf?'· '+c.uf:''}</div></div>
+      ${c.lado?`<span class="pill ${c.lado==='A'?'pill-a':'pill-b'}">${c.lado}</span>`:'<span class="pill pill-pending">Sem div.</span>'}
+    </div>`).join('');
+}
+
+function filterCL(){
+  const s=(document.getElementById('sc-search')?.value||'').toLowerCase();
+  const l=document.getElementById('sc-lado')?.value||'';
+  const f=allClients.filter(c=>{
+    if(s&&!c.nome.toLowerCase().includes(s)) return false;
+    if(l&&(c.lado||'')!==l) return false;
+    return true;
+  });
+  document.getElementById('cl-list').innerHTML=renderCLHTML(f);
+}
+
+function previewCSV(){
+  const file=document.getElementById('csv-file').files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    const sep=text.includes(';')?';':',';
+    const lines=text.trim().split('\n');
+    const headers=lines[0].split(sep).map(h=>h.trim().toLowerCase().replace(/"/g,''));
+    const rows=lines.slice(1).map(l=>{
+      const vals=l.split(sep);
+      const obj={};
+      headers.forEach((h,i)=>obj[h]=(vals[i]||'').trim().replace(/"/g,''));
+      return obj;
+    }).filter(r=>r.nome);
+    const la=rows.filter(r=>(r.lado||'').toUpperCase()==='A').length;
+    const lb=rows.filter(r=>(r.lado||'').toUpperCase()==='B').length;
+    const ls=rows.filter(r=>!r.lado).length;
+    document.getElementById('csv-preview').innerHTML=`
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${rows.length} clientes · Divisão A: ${la} · Divisão B: ${lb}${ls?' · Sem divisão: '+ls:''}</p>
+      <button class="btn-config" onclick='importCSV(${JSON.stringify(rows).replace(/'/g,"&#39;")})'>Importar ${rows.length} clientes</button>`;
+  };
+  reader.readAsText(file);
+}
+
+async function importCSV(rows){
+  if(!confirm(`Importar ${rows.length} clientes? Isso não apaga os existentes.`)) return;
+  const status=document.getElementById('csv-status');
+  status.innerHTML='<span style="color:var(--text-muted)">Importando...</span>';
+  try{
+    for(let i=0;i<rows.length;i+=400){
+      const batch=db.batch();
+      rows.slice(i,i+400).forEach(r=>{
+        batch.set(db.collection('clientes').doc(),{
+          nome:r.nome||'',cidade:r.cidade||'',uf:(r.uf||'').toUpperCase(),
+          rede:r.rede||'',bairro:r.bairro||'',cep:r.cep||'',
+          lado:(r.lado||'').toUpperCase()||null,
+          createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+      await batch.commit();
+    }
+    await loadData();
+    status.innerHTML=`<span style="color:var(--green)">✓ ${rows.length} clientes importados!</span>`;
+    renderTabClientes();
+  } catch(e){ status.innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
+}
+
+// ---- CONFIG ----
+function renderTabConfig(){
+  document.getElementById('tab-content').innerHTML=`
+    <div class="config-area">
+      <div class="config-title">Cadastrar assessor</div>
+      <label>Nome</label><input type="text" id="nn" placeholder="Nome completo"/>
+      <label>E-mail</label><input type="email" id="ne" placeholder="assessor@email.com"/>
+      <label>Senha inicial</label><input type="password" id="np" placeholder="mínimo 6 caracteres"/>
+      <button class="btn-config" onclick="createAssessor()">Cadastrar assessor</button>
+      <div id="cs" style="margin-top:10px;font-size:13px"></div>
+    </div>
+    <div class="config-area">
+      <div class="config-title">Assessores (${allAssessores.length})</div>
+      ${allAssessores.length?allAssessores.map(a=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div><div style="font-weight:500">${a.nome}</div><div style="font-size:13px;color:var(--text-muted)">${a.email}</div></div>
+          <div style="display:flex;gap:6px">
+            <span class="pill pill-a">${allClients.filter(c=>c.assessorUid===a.uid&&c.lado==='A').length} farm. A</span>
+            <span class="pill pill-b">${allClients.filter(c=>c.assessorUid===a.uid&&c.lado==='B').length} farm. B</span>
+          </div>
+        </div>`).join(''):'<div style="color:var(--text-muted);font-size:14px">Nenhum assessor cadastrado.</div>'}
+    </div>`;
+}
+
+async function createAssessor(){
+  const nome=document.getElementById('nn').value.trim();
+  const email=document.getElementById('ne').value.trim();
+  const pass=document.getElementById('np').value;
+  const st=document.getElementById('cs');
+  if(!nome||!email||!pass){st.innerHTML='<span style="color:var(--danger)">Preencha todos os campos.</span>';return;}
+  if(pass.length<6){st.innerHTML='<span style="color:var(--danger)">Senha mínima: 6 caracteres.</span>';return;}
+  st.innerHTML='<span style="color:var(--text-muted)">Criando...</span>';
+  try{
+    const sec=firebase.initializeApp(firebase.app().options,'sec_'+Date.now());
+    const sa=sec.auth();
+    const cr=await sa.createUserWithEmailAndPassword(email,pass);
+    const uid=cr.user.uid;
+    await sa.signOut(); await sec.delete();
+    await db.collection('usuarios').doc(uid).set({nome,email,role:'assessor',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    allAssessores.push({uid,nome,email});
+    st.innerHTML=`<span style="color:var(--green)">✓ Assessor <strong>${nome}</strong> cadastrado!</span>`;
+    document.getElementById('nn').value=''; document.getElementById('ne').value=''; document.getElementById('np').value='';
+  } catch(e){ st.innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
+}
+
+// ===================== ASSESSOR =====================
+function renderAssessorList(){
+  const my=allClients.filter(c=>c.assessorUid===currentUser.uid);
+  const done=my.filter(c=>allVisits[c.id]).length;
+  const total=my.length;
+  const pct=total?Math.round(done/total*100):0;
+  const lado=my.length?my[0].lado:'?';
+  window._myClients=my;
+
+  document.getElementById('main-content').innerHTML=`
+    <div style="margin-bottom:1rem">
+      <p style="font-weight:600;font-size:16px">Minha base — Divisão ${lado}</p>
+      <p class="progress-label" style="margin-top:.5rem">${done} de ${total} farmácias visitadas</p>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div style="margin-bottom:.75rem"><input type="text" placeholder="Buscar farmácia..." oninput="filterAL(this.value)"/></div>
+    <div class="client-list" id="al">${renderALHTML(my)}</div>`;
+}
+
+function renderALHTML(clients){
+  if(!clients.length) return '<div class="empty-state">Nenhuma farmácia atribuída a você ainda.<br>Aguarde o gestor fazer a distribuição.</div>';
+  return clients.map(c=>{
+    const v=allVisits[c.id];
+    const meta=v?`${v.responsavel||''} · Porte ${v.porte||'?'}`:c.bairro||c.cidade||'';
+    return`<div class="client-card ${v?'done':''}" onclick="openClient('${c.id}')">
+      <div><div class="client-name">${c.nome}</div><div class="client-meta">${meta}</div></div>
+      <div class="sdot ${v?'dot-d':'dot-p'}"></div>
+    </div>`;
+  }).join('');
+}
+
+function filterAL(s){
+  const f=(window._myClients||[]).filter(c=>c.nome.toLowerCase().includes(s.toLowerCase()));
+  document.getElementById('al').innerHTML=renderALHTML(f);
+}
+
+function openClient(id){
+  const c=allClients.find(x=>x.id===id), v=allVisits[id]||{};
+  window._selectedSize=v.porte||null;
+  document.getElementById('main-content').innerHTML=`
+    <button class="back-btn" onclick="renderAssessorList()">← Voltar</button>
+    <div class="detail-name">${c.nome}</div>
+    <div class="detail-sub">${c.bairro||''} ${c.cidade?'· '+c.cidade:''} ${c.uf?'· '+c.uf:''} ${c.rede?'· '+c.rede:''}</div>
+    <div class="form-card">
+      <div class="form-row">
+        <div><label>Nome do responsável</label><input type="text" id="fr" placeholder="Ex: João Silva" value="${v.responsavel||''}"/></div>
+        <div><label>Telefone</label><input type="tel" id="ft" placeholder="(11) 99999-9999" value="${v.telefone||''}"/></div>
+      </div>
+      <label>Tamanho da loja</label>
+      <div class="size-grid">${['P','M','G','GG'].map(s=>`<button class="size-btn ${v.porte===s?'sel':''}" onclick="selSz(this,'${s}')">${s}</button>`).join('')}</div>
+      <label>Observações</label>
+      <textarea id="fo" placeholder="Anotações sobre a visita...">${v.obs||''}</textarea>
+    </div>
+    <button class="btn-save" id="bsave" onclick="saveVisit('${id}')">Salvar visita</button>
+    <div class="saved-badge" id="sbadge">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      Salvo com sucesso
+    </div>`;
+}
+
+function selSz(el,s){ window._selectedSize=s; document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+
+async function saveVisit(clienteId){
+  const responsavel=document.getElementById('fr').value.trim();
+  const telefone=document.getElementById('ft').value.trim();
+  const porte=window._selectedSize||null;
+  const obs=document.getElementById('fo').value.trim();
+  const btn=document.getElementById('bsave');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Salvando...';
+  const data={clienteId,assessorUid:currentUser.uid,assessorEmail:currentUser.email,responsavel,telefone,porte,obs,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+  try{
+    if(allVisits[clienteId]){ await db.collection('visitas').doc(allVisits[clienteId].id).update(data); }
+    else{ data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); const r=await db.collection('visitas').add(data); allVisits[clienteId]={id:r.id,...data}; }
+    allVisits[clienteId]={...allVisits[clienteId],...data};
+    btn.disabled=false; btn.textContent='Salvar visita';
+    const b=document.getElementById('sbadge'); b.style.display='flex';
+    setTimeout(()=>b.style.display='none',2500);
+  } catch(e){ alert('Erro: '+e.message); btn.disabled=false; btn.textContent='Salvar visita'; }
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('auth-screen')?.style.display!=='none') doLogin(); });
+</script>
+</body>
+</html>
