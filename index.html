@@ -99,13 +99,20 @@
   .back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:14px;background:none;border:none;cursor:pointer;margin-bottom:1.25rem;padding:0;}
   .back-btn:hover{color:var(--text);}
   .detail-name{font-size:22px;font-weight:600;}
-  .detail-sub{font-size:14px;color:var(--text-muted);margin-top:2px;margin-bottom:1.5rem;}
+  .detail-info{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:8px 0 1.5rem;display:flex;flex-direction:column;gap:6px;}
+  .detail-info-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;}
+  .detail-info-label{font-weight:500;color:var(--text-muted);min-width:70px;font-size:13px;}
+  .detail-info-value{color:var(--text);}
   .form-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;}
   .size-btn{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--white);font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--text-muted);}
   .size-btn:hover{border-color:var(--green);color:var(--green);}
   .size-btn.sel{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
+  .option-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .opt-btn{padding:8px 14px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--text-muted);}
+  .opt-btn:hover{border-color:var(--green);color:var(--green);}
+  .opt-btn.sel{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
   .btn-save{background:var(--green);color:white;width:100%;padding:13px;font-size:15px;margin-top:.5rem;border-radius:10px;border:none;font-family:inherit;font-weight:500;cursor:pointer;}
   .btn-save:hover{opacity:.9;}
   .saved-badge{display:none;align-items:center;gap:6px;color:var(--green);font-size:14px;font-weight:500;background:var(--green-light);padding:8px 14px;border-radius:8px;margin-top:8px;}
@@ -113,6 +120,8 @@
   @keyframes spin{to{transform:rotate(360deg);}}
   .loading-full{display:flex;align-items:center;justify-content:center;min-height:100vh;}
   .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:15px;}
+  .btn-export{background:var(--green);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;}
+  .btn-export:hover{opacity:.9;}
 </style>
 </head>
 <body>
@@ -245,23 +254,29 @@ function renderTabPainel(){
       <select id="s-assessor" onchange="filterP()">${aOpts}</select>
       <select id="s-div" onchange="filterP()"><option value="">Todas as divisões</option><option value="A">Divisão A</option><option value="B">Divisão B</option></select>
       <select id="s-status" onchange="filterP()"><option value="">Todos os status</option><option value="done">Visitados</option><option value="pending">Pendentes</option></select>
-      <button onclick="exportExcel()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;">⬇ Exportar Excel</button>
+      <button class="btn-export" onclick="exportExcel()">⬇ Exportar Excel</button>
     </div>
     <div class="table-wrap"><table class="vtable">
-      <thead><tr><th>Farmácia</th><th>Divisão</th><th>Assessor</th><th>Responsável</th><th>Porte</th><th>Status</th></tr></thead>
+      <thead><tr><th>Farmácia</th><th>Divisão</th><th>Assessor</th><th>Responsável</th><th>Porte</th><th>Visita RCA</th><th>Acesso Online</th><th>Status</th></tr></thead>
       <tbody id="ptbody">${buildRows(allClients)}</tbody>
     </table></div>`;
 }
 
 function buildRows(clients){
-  if(!clients.length) return '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum resultado</td></tr>';
+  if(!clients.length) return '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum resultado</td></tr>';
   return clients.map(c=>{
     const v=allVisits[c.id];
     const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'—':'—';
     const dp=c.lado==='A'?'<span class="pill pill-a">A</span>':c.lado==='B'?'<span class="pill pill-b">B</span>':'—';
-    return`<tr><td><strong>${c.nome}</strong><br><span style="color:var(--text-muted);font-size:12px">${c.bairro||''} ${c.uf?'· '+c.uf:''}</span></td>
-    <td>${dp}</td><td>${an}</td><td>${v?v.responsavel||'—':'—'}</td><td>${v?v.porte||'—':'—'}</td>
-    <td><span class="pill ${v?'pill-done':'pill-pending'}">${v?'Visitado':'Pendente'}</span></td></tr>`;
+    return`<tr>
+      <td><strong>${c.nome}</strong><br><span style="color:var(--text-muted);font-size:12px">${c.bairro||''} ${c.uf?'· '+c.uf:''}</span></td>
+      <td>${dp}</td><td>${an}</td>
+      <td>${v?v.responsavel||'—':'—'}</td>
+      <td>${v?v.porte||'—':'—'}</td>
+      <td style="font-size:13px">${v?v.visitaRca||'—':'—'}</td>
+      <td style="font-size:13px">${v?v.acessoOnline||'—':'—'}</td>
+      <td><span class="pill ${v?'pill-done':'pill-pending'}">${v?'Visitado':'Pendente'}</span></td>
+    </tr>`;
   }).join('');
 }
 
@@ -282,39 +297,58 @@ function filterP(){
   document.getElementById('ptbody').innerHTML=buildRows(f);
 }
 
+function exportExcel(){
+  const rows=[['Código','Farmácia','Endereço','Bairro','Cidade','UF','CEP','Rede','Divisão','Assessor','Responsável','Telefone','Porte','Visita RCA','Acesso Online','Observações','Status','Data visita']];
+  allClients.forEach(c=>{
+    const v=allVisits[c.id];
+    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'':'';
+    const dt=v&&v.updatedAt?new Date(v.updatedAt.seconds*1000).toLocaleDateString('pt-BR'):'';
+    rows.push([
+      c.codigo||'', c.nome||'', c.endereco||'', c.bairro||'', c.cidade||'', c.uf||'', c.cep||'', c.rede||'',
+      c.lado||'', an,
+      v?v.responsavel||'':'', v?v.telefone||'':'', v?v.porte||'':'',
+      v?v.visitaRca||'':'', v?v.acessoOnline||'':'', v?v.obs||'':'',
+      v?'Visitado':'Pendente', dt
+    ]);
+  });
+  const ws=rows.map(r=>r.map(c=>{
+    const s=String(c);
+    return s.includes(',')||s.includes('"')?`"${s.replace(/"/g,'""')}"`:s;
+  }).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+ws],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`farmavisitas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
 // ---- DIVISÃO DA CIDADE ----
 function renderTabDivisao(){
   const cA=allClients.filter(c=>(c.lado||'')==='A');
   const cB=allClients.filter(c=>(c.lado||'')==='B');
   const cS=allClients.filter(c=>!c.lado);
   const aOpts='<option value="">-- Selecionar assessor --</option>'+allAssessores.map(a=>`<option value="${a.uid}">${a.nome}</option>`).join('');
-
   document.getElementById('tab-content').innerHTML=`
     <div style="margin-bottom:1rem">
       <p style="font-weight:600;font-size:16px">Divisão da cidade</p>
       <p style="font-size:13px;color:var(--text-muted);margin-top:2px">Selecione a divisão e atribua um assessor responsável</p>
     </div>
     <div class="div-tabs">
-      <button class="div-tab act-a" id="dt-A" onclick="switchDT('A')">Divisão A <span style="font-size:12px;opacity:.8">(${cA.length} farmácias)</span></button>
-      <button class="div-tab" id="dt-B" onclick="switchDT('B')">Divisão B <span style="font-size:12px;opacity:.8">(${cB.length} farmácias)</span></button>
+      <button class="div-tab act-a" id="dt-A" onclick="switchDT('A')">Divisão A <span style="font-size:12px;opacity:.8">(${cA.length})</span></button>
+      <button class="div-tab" id="dt-B" onclick="switchDT('B')">Divisão B <span style="font-size:12px;opacity:.8">(${cB.length})</span></button>
       ${cS.length?`<button class="div-tab" id="dt-S" onclick="switchDT('S')">Sem divisão <span style="font-size:12px;opacity:.8">(${cS.length})</span></button>`:''}
     </div>
-
     <div id="assign-bar" class="assign-bar">
       <label id="assign-label">Assessor responsável pela Divisão A:</label>
       <select id="assign-select">${aOpts}</select>
       <button class="btn-assign" onclick="assignDivisao()">Atribuir</button>
     </div>
-
     <div id="div-status" style="font-size:13px;margin-bottom:10px;min-height:20px"></div>
-
     <div class="table-wrap"><table class="vtable">
       <thead><tr><th>Farmácia</th><th>Bairro</th><th>Assessor atribuído</th><th>Status visita</th></tr></thead>
       <tbody id="dtbody"></tbody>
     </table></div>`;
-
   window._curDT='A';
-  // Pre-select if already assigned
   if(cA.length&&cA[0].assessorUid) document.getElementById('assign-select').value=cA[0].assessorUid;
   renderDT('A');
 }
@@ -325,16 +359,13 @@ function switchDT(d){
   if(d==='A') document.getElementById('dt-A').className='div-tab act-a';
   else if(d==='B') document.getElementById('dt-B').className='div-tab act-b';
   else if(document.getElementById('dt-S')) document.getElementById('dt-S').className='div-tab act-s';
-
   const bar=document.getElementById('assign-bar');
-  const lbl=document.getElementById('assign-label');
-  const sel=document.getElementById('assign-select');
   if(d==='S'){ bar.style.display='none'; }
   else {
     bar.style.display='flex';
-    lbl.textContent=`Assessor responsável pela Divisão ${d}:`;
+    document.getElementById('assign-label').textContent=`Assessor responsável pela Divisão ${d}:`;
     const clients=allClients.filter(c=>(c.lado||'')===d);
-    sel.value=clients.length&&clients[0].assessorUid?clients[0].assessorUid:'';
+    document.getElementById('assign-select').value=clients.length&&clients[0].assessorUid?clients[0].assessorUid:'';
   }
   document.getElementById('div-status').innerHTML='';
   renderDT(d);
@@ -351,13 +382,12 @@ function renderDT(d){
 }
 
 async function assignDivisao(){
-  const d=window._curDT;
-  if(d==='S') return;
+  const d=window._curDT; if(d==='S') return;
   const assessorUid=document.getElementById('assign-select').value;
   if(!assessorUid) return alert('Selecione um assessor.');
   const clients=allClients.filter(c=>(c.lado||'')===d);
   if(!clients.length){ document.getElementById('div-status').innerHTML='<span style="color:var(--amber)">Nenhuma farmácia nessa divisão.</span>'; return; }
-  document.getElementById('div-status').innerHTML='<span style="color:var(--text-muted)">Atribuindo '+clients.length+' farmácias...</span>';
+  document.getElementById('div-status').innerHTML=`<span style="color:var(--text-muted)">Atribuindo ${clients.length} farmácias...</span>`;
   try{
     for(let i=0;i<clients.length;i+=400){
       const batch=db.batch();
@@ -376,7 +406,7 @@ function renderTabClientes(){
   document.getElementById('tab-content').innerHTML=`
     <div class="config-area">
       <div class="config-title">Importar lista de clientes (CSV)</div>
-      <div class="config-hint">Colunas esperadas: <strong>nome, cidade, uf, rede, bairro, cep, lado</strong><br>A coluna <strong>lado</strong> deve ser A ou B. Separador vírgula ou ponto e vírgula.</div>
+      <div class="config-hint">Colunas: <strong>codigo, nome, endereco, bairro, cidade, uf, cep, rede, lado</strong><br>Separador vírgula ou ponto e vírgula.</div>
       <input type="file" id="csv-file" accept=".csv" onchange="previewCSV()"/>
       <div id="csv-preview" style="margin-top:10px"></div>
       <div id="csv-status" style="margin-top:8px;font-size:13px"></div>
@@ -386,7 +416,7 @@ function renderTabClientes(){
       ${semDiv?`<p style="font-size:13px;color:var(--amber);margin-bottom:10px">⚠ ${semDiv} farmácias sem divisão definida.</p>`:''}
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <input type="text" id="sc-search" placeholder="Buscar..." oninput="filterCL()"/>
-        <select id="sc-lado" onchange="filterCL()" style="width:auto"><option value="">Todas as divisões</option><option value="A">A</option><option value="B">B</option></select>
+        <select id="sc-lado" onchange="filterCL()" style="width:auto"><option value="">Todas</option><option value="A">A</option><option value="B">B</option></select>
       </div>
       <div id="cl-list" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">${renderCLHTML(allClients)}</div>
     </div>`;
@@ -396,7 +426,10 @@ function renderCLHTML(clients){
   if(!clients.length) return '<div style="color:var(--text-muted);font-size:14px;padding:1rem">Nenhum resultado.</div>';
   return clients.map(c=>`
     <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center">
-      <div><div style="font-weight:500;font-size:14px">${c.nome}</div><div style="font-size:12px;color:var(--text-muted)">${c.bairro||''} ${c.uf?'· '+c.uf:''}</div></div>
+      <div>
+        <div style="font-weight:500;font-size:14px">${c.nome}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${c.codigo?'Cód: '+c.codigo+' · ':''}${c.bairro||''} ${c.uf?'· '+c.uf:''}</div>
+      </div>
       ${c.lado?`<span class="pill ${c.lado==='A'?'pill-a':'pill-b'}">${c.lado}</span>`:'<span class="pill pill-pending">Sem div.</span>'}
     </div>`).join('');
 }
@@ -413,8 +446,7 @@ function filterCL(){
 }
 
 function previewCSV(){
-  const file=document.getElementById('csv-file').files[0];
-  if(!file) return;
+  const file=document.getElementById('csv-file').files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=e=>{
     const text=e.target.result;
@@ -429,9 +461,8 @@ function previewCSV(){
     }).filter(r=>r.nome);
     const la=rows.filter(r=>(r.lado||'').toUpperCase()==='A').length;
     const lb=rows.filter(r=>(r.lado||'').toUpperCase()==='B').length;
-    const ls=rows.filter(r=>!r.lado).length;
     document.getElementById('csv-preview').innerHTML=`
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${rows.length} clientes · Divisão A: ${la} · Divisão B: ${lb}${ls?' · Sem divisão: '+ls:''}</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${rows.length} clientes · Divisão A: ${la} · Divisão B: ${lb}</p>
       <button class="btn-config" onclick='importCSV(${JSON.stringify(rows).replace(/'/g,"&#39;")})'>Importar ${rows.length} clientes</button>`;
   };
   reader.readAsText(file);
@@ -446,9 +477,9 @@ async function importCSV(rows){
       const batch=db.batch();
       rows.slice(i,i+400).forEach(r=>{
         batch.set(db.collection('clientes').doc(),{
-          nome:r.nome||'',cidade:r.cidade||'',uf:(r.uf||'').toUpperCase(),
-          rede:r.rede||'',bairro:r.bairro||'',cep:r.cep||'',
-          lado:(r.lado||'').toUpperCase()||null,
+          codigo:r.codigo||'', nome:r.nome||'', endereco:r.endereco||'',
+          bairro:r.bairro||'', cidade:r.cidade||'', uf:(r.uf||'').toUpperCase(),
+          cep:r.cep||'', rede:r.rede||'', lado:(r.lado||'').toUpperCase()||null,
           createdAt:firebase.firestore.FieldValue.serverTimestamp()
         });
       });
@@ -513,7 +544,6 @@ function renderAssessorList(){
   const pct=total?Math.round(done/total*100):0;
   const lado=my.length?my[0].lado:'?';
   window._myClients=my;
-
   document.getElementById('main-content').innerHTML=`
     <div style="margin-bottom:1rem">
       <p style="font-weight:600;font-size:16px">Minha base — Divisão ${lado}</p>
@@ -544,10 +574,22 @@ function filterAL(s){
 function openClient(id){
   const c=allClients.find(x=>x.id===id), v=allVisits[id]||{};
   window._selectedSize=v.porte||null;
+  window._selectedRca=v.visitaRca||null;
+  window._selectedOnline=v.acessoOnline||null;
+
+  const rcaOpts=['Visita semanal','Visita por quinzena','Visita mensal','Não conhece o RCA','Somente WhatsApp'];
+  const onlineOpts=['Site','Televendas app','Não tem'];
+
   document.getElementById('main-content').innerHTML=`
     <button class="back-btn" onclick="renderAssessorList()">← Voltar</button>
     <div class="detail-name">${c.nome}</div>
-    <div class="detail-sub">${c.bairro||''} ${c.cidade?'· '+c.cidade:''} ${c.uf?'· '+c.uf:''} ${c.rede?'· '+c.rede:''}</div>
+    <div class="detail-info">
+      ${c.codigo?`<div class="detail-info-row"><span class="detail-info-label">Código</span><span class="detail-info-value">${c.codigo}</span></div>`:''}
+      ${c.endereco?`<div class="detail-info-row"><span class="detail-info-label">Endereço</span><span class="detail-info-value">${c.endereco}</span></div>`:''}
+      <div class="detail-info-row"><span class="detail-info-label">Bairro</span><span class="detail-info-value">${c.bairro||'—'} ${c.cidade?'· '+c.cidade:''} ${c.uf?'· '+c.uf:''}</span></div>
+      ${c.cep?`<div class="detail-info-row"><span class="detail-info-label">CEP</span><span class="detail-info-value">${c.cep}</span></div>`:''}
+      ${c.rede?`<div class="detail-info-row"><span class="detail-info-label">Rede</span><span class="detail-info-value">${c.rede}</span></div>`:''}
+    </div>
     <div class="form-card">
       <div class="form-row">
         <div><label>Nome do responsável</label><input type="text" id="fr" placeholder="Ex: João Silva" value="${v.responsavel||''}"/></div>
@@ -555,6 +597,10 @@ function openClient(id){
       </div>
       <label>Tamanho da loja</label>
       <div class="size-grid">${['P','M','G','GG'].map(s=>`<button class="size-btn ${v.porte===s?'sel':''}" onclick="selSz(this,'${s}')">${s}</button>`).join('')}</div>
+      <label>Recebe visita do RCA?</label>
+      <div class="option-grid">${rcaOpts.map(o=>`<button class="opt-btn ${v.visitaRca===o?'sel':''}" onclick="selOpt(this,'rca','${o}')">${o}</button>`).join('')}</div>
+      <label>Acesso online?</label>
+      <div class="option-grid">${onlineOpts.map(o=>`<button class="opt-btn ${v.acessoOnline===o?'sel':''}" onclick="selOpt(this,'online','${o}')">${o}</button>`).join('')}</div>
       <label>Observações</label>
       <textarea id="fo" placeholder="Anotações sobre a visita...">${v.obs||''}</textarea>
     </div>
@@ -566,15 +612,24 @@ function openClient(id){
 }
 
 function selSz(el,s){ window._selectedSize=s; document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+function selOpt(el,type,val){
+  if(type==='rca') window._selectedRca=val;
+  else window._selectedOnline=val;
+  const grid=el.parentElement;
+  grid.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
 
 async function saveVisit(clienteId){
   const responsavel=document.getElementById('fr').value.trim();
   const telefone=document.getElementById('ft').value.trim();
   const porte=window._selectedSize||null;
+  const visitaRca=window._selectedRca||null;
+  const acessoOnline=window._selectedOnline||null;
   const obs=document.getElementById('fo').value.trim();
   const btn=document.getElementById('bsave');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Salvando...';
-  const data={clienteId,assessorUid:currentUser.uid,assessorEmail:currentUser.email,responsavel,telefone,porte,obs,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+  const data={clienteId,assessorUid:currentUser.uid,assessorEmail:currentUser.email,responsavel,telefone,porte,visitaRca,acessoOnline,obs,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
   try{
     if(allVisits[clienteId]){ await db.collection('visitas').doc(allVisits[clienteId].id).update(data); }
     else{ data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); const r=await db.collection('visitas').add(data); allVisits[clienteId]={id:r.id,...data}; }
@@ -583,28 +638,6 @@ async function saveVisit(clienteId){
     const b=document.getElementById('sbadge'); b.style.display='flex';
     setTimeout(()=>b.style.display='none',2500);
   } catch(e){ alert('Erro: '+e.message); btn.disabled=false; btn.textContent='Salvar visita'; }
-}
-
-function exportExcel(){
-  const rows=[['Farmácia','Bairro','Cidade','UF','Rede','CEP','Divisão','Assessor','Responsável','Telefone','Porte','Observações','Status','Data visita']];
-  allClients.forEach(c=>{
-    const v=allVisits[c.id];
-    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'':'' ;
-    const data=v&&v.updatedAt?new Date(v.updatedAt.seconds*1000).toLocaleDateString('pt-BR'):'';
-    rows.push([
-      c.nome||'', c.bairro||'', c.cidade||'', c.uf||'', c.rede||'', c.cep||'',
-      c.lado||'', an,
-      v?v.responsavel||'':'', v?v.telefone||'':'', v?v.porte||'':'', v?v.obs||'':'',
-      v?'Visitado':'Pendente', data
-    ]);
-  });
-  const ws=rows.map(r=>r.map(c=>typeof c==='string'&&c.includes(',')?`"${c}"`:c).join(',')).join('\n');
-  const bom='\uFEFF';
-  const blob=new Blob([bom+ws],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=`farmavisitas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
-  a.click(); URL.revokeObjectURL(url);
 }
 
 document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('auth-screen')?.style.display!=='none') doLogin(); });
