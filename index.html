@@ -5,16 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FarmaVisitas</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
   :root {
     --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#085041;
     --gray:#888780;--gray-light:#F1EFE8;--border:#D3D1C7;
     --text:#2C2C2A;--text-muted:#5F5E5A;--bg:#F8F7F3;--white:#FFFFFF;
     --danger:#E24B4A;--amber:#BA7517;--amber-light:#FAEEDA;
-    --blue:#185FA5;--blue-light:#E6F1FB;
+    --blue:#185FA5;--blue-light:#E6F1FB;--purple:#6B3FA0;--purple-light:#F0EAFA;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;}
+
+  /* AUTH */
   #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;}
   .auth-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:380px;}
   .logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;}
@@ -32,6 +34,8 @@
   .btn-primary:hover{opacity:.9;}
   .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
   .error-msg{color:var(--danger);font-size:13px;margin-top:10px;display:none;}
+
+  /* APP */
   #app-screen{display:none;min-height:100vh;flex-direction:column;}
   .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
   .topbar-logo{display:flex;align-items:center;gap:8px;}
@@ -41,14 +45,19 @@
   .topbar-right{display:flex;align-items:center;gap:12px;}
   .user-chip{font-size:13px;color:var(--text-muted);}
   .badge-role{font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;}
+  .badge-admin{background:var(--purple-light);color:var(--purple);}
   .badge-gestor{background:var(--amber-light);color:var(--amber);}
   .badge-assessor{background:var(--green-light);color:var(--green-dark);}
   .btn-logout{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:4px 8px;border-radius:6px;}
-  .btn-logout:hover{background:var(--gray-light);color:var(--text);}
-  .main-content{flex:1;padding:1.5rem 1.25rem;max-width:820px;margin:0 auto;width:100%;}
-  .tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);}
-  .tab{padding:10px 16px;font-size:14px;font-weight:500;color:var(--text-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s;}
+  .btn-logout:hover{background:var(--gray-light);}
+  .main-content{flex:1;padding:1.5rem 1.25rem;max-width:860px;margin:0 auto;width:100%;}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  .tab{padding:10px 16px;font-size:14px;font-weight:500;color:var(--text-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s;white-space:nowrap;}
   .tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+  /* CARDS */
   .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
   .stat-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;}
   .stat-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
@@ -58,35 +67,44 @@
   .progress-bar-wrap{background:var(--border);border-radius:20px;height:6px;margin-bottom:1.25rem;overflow:hidden;}
   .progress-bar-fill{height:100%;background:var(--green);border-radius:20px;transition:width .4s;}
   .progress-label{font-size:13px;color:var(--text-muted);margin-bottom:4px;}
+
+  /* FILTERS */
   .filter-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;}
   .filter-row select{width:auto;flex:1;min-width:130px;}
   .filter-row input{flex:2;min-width:160px;}
-  .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+
+  /* TABLE */
+  .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto;}
   .vtable{width:100%;border-collapse:collapse;font-size:14px;}
-  .vtable th{text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--bg);}
+  .vtable th{text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap;}
   .vtable td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
   .vtable tr:last-child td{border-bottom:none;}
   .vtable tr:hover td{background:var(--gray-light);}
+
+  /* PILLS */
   .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:500;}
   .pill-done{background:var(--green-light);color:var(--green-dark);}
   .pill-pending{background:var(--gray-light);color:var(--gray);}
-  .pill-a{background:var(--blue-light);color:var(--blue);}
-  .pill-b{background:var(--amber-light);color:var(--amber);}
+  .pill-tet{background:var(--blue-light);color:var(--blue);}
+  .pill-admin{background:var(--purple-light);color:var(--purple);}
+
+  /* CONFIG */
   .config-area{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
-  .config-title{font-size:14px;font-weight:600;margin-bottom:.5rem;}
+  .config-title{font-size:15px;font-weight:600;margin-bottom:.5rem;}
   .config-hint{font-size:13px;color:var(--text-muted);margin-bottom:.75rem;line-height:1.6;}
   .btn-config{background:var(--green);color:white;padding:10px 18px;border-radius:8px;border:none;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px;}
   .btn-config:hover{opacity:.9;}
-  .div-tabs{display:flex;gap:6px;margin-bottom:1rem;}
-  .div-tab{padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:all .15s;}
-  .div-tab.act-a{background:var(--blue-light);border-color:var(--blue);color:var(--blue);}
-  .div-tab.act-b{background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
-  .div-tab.act-s{background:var(--gray-light);border-color:var(--gray);color:var(--gray);}
-  .assign-bar{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .assign-bar label{margin:0;font-size:14px;font-weight:500;color:var(--text);}
-  .assign-bar select{width:auto;flex:1;min-width:180px;}
-  .btn-assign{background:var(--green);color:white;padding:9px 20px;border-radius:8px;border:none;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;}
-  .btn-assign:hover{opacity:.9;}
+  .btn-danger{background:var(--danger);color:white;padding:7px 14px;border-radius:8px;border:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;}
+  .btn-export{background:var(--green);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;}
+
+  /* TET CARDS */
+  .tet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:1rem;}
+  .tet-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;}
+  .tet-card-name{font-weight:600;font-size:15px;margin-bottom:4px;}
+  .tet-card-meta{font-size:13px;color:var(--text-muted);margin-bottom:8px;}
+  .tet-card-stats{display:flex;gap:8px;flex-wrap:wrap;}
+
+  /* CLIENT LIST */
   .client-list{display:flex;flex-direction:column;gap:8px;}
   .client-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;}
   .client-card:hover{border-color:var(--green);}
@@ -96,13 +114,14 @@
   .sdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-left:12px;}
   .dot-p{background:var(--border);}
   .dot-d{background:var(--green);}
+
+  /* DETAIL */
   .back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:14px;background:none;border:none;cursor:pointer;margin-bottom:1.25rem;padding:0;}
   .back-btn:hover{color:var(--text);}
   .detail-name{font-size:22px;font-weight:600;}
   .detail-info{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:8px 0 1.5rem;display:flex;flex-direction:column;gap:6px;}
   .detail-info-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;}
   .detail-info-label{font-weight:500;color:var(--text-muted);min-width:70px;font-size:13px;}
-  .detail-info-value{color:var(--text);}
   .form-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;}
@@ -114,14 +133,14 @@
   .opt-btn:hover{border-color:var(--green);color:var(--green);}
   .opt-btn.sel{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
   .btn-save{background:var(--green);color:white;width:100%;padding:13px;font-size:15px;margin-top:.5rem;border-radius:10px;border:none;font-family:inherit;font-weight:500;cursor:pointer;}
-  .btn-save:hover{opacity:.9;}
   .saved-badge{display:none;align-items:center;gap:6px;color:var(--green);font-size:14px;font-weight:500;background:var(--green-light);padding:8px 14px;border-radius:8px;margin-top:8px;}
+
+  /* SPINNER */
   .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .loading-full{display:flex;align-items:center;justify-content:center;min-height:100vh;}
   .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:15px;}
-  .btn-export{background:var(--green);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;}
-  .btn-export:hover{opacity:.9;}
+  .status-msg{font-size:13px;margin-top:8px;min-height:18px;}
 </style>
 </head>
 <body>
@@ -167,8 +186,10 @@
 const firebaseConfig={apiKey:"AIzaSyDm6m6ESUBFs1meqaPoumhnUCnl2rg6LCU",authDomain:"map-farma-4faf1.firebaseapp.com",projectId:"map-farma-4faf1",storageBucket:"map-farma-4faf1.firebasestorage.app",messagingSenderId:"617219254183",appId:"1:617219254183:web:d2d76d80c529f853e63882"};
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth(), db=firebase.firestore();
-let currentUser=null,currentRole=null,allClients=[],allVisits={},allAssessores=[];
+let currentUser=null, currentRole=null;
+let allClients=[], allVisits={}, allAssessores=[], allTets=[];
 
+// ===================== AUTH =====================
 auth.onAuthStateChanged(async user=>{
   document.getElementById('loading-screen').style.display='none';
   if(user){
@@ -178,12 +199,14 @@ auth.onAuthStateChanged(async user=>{
       const data=snap.data(); currentRole=data.role;
       document.getElementById('topbar-user').textContent=data.nome||user.email;
       const re=document.getElementById('topbar-role');
-      re.textContent=currentRole==='gestor'?'Gestor':'Assessor';
-      re.className='badge-role '+(currentRole==='gestor'?'badge-gestor':'badge-assessor');
+      re.textContent=currentRole==='admin'?'Admin':currentRole==='gestor'?'Gestor':'Assessor';
+      re.className='badge-role badge-'+currentRole;
       document.getElementById('auth-screen').style.display='none';
       document.getElementById('app-screen').style.display='flex';
       await loadData();
-      if(currentRole==='gestor') renderGestor(); else renderAssessorList();
+      if(currentRole==='admin') renderAdmin();
+      else if(currentRole==='gestor') renderGestor();
+      else renderAssessorList();
     } else { auth.signOut(); showAE('Usuário não encontrado.'); }
   } else {
     document.getElementById('auth-screen').style.display='flex';
@@ -204,245 +227,102 @@ function doLogout(){ auth.signOut(); }
 function showAE(m){ const e=document.getElementById('auth-error'); e.textContent=m; e.style.display='block'; }
 function hideAE(){ document.getElementById('auth-error').style.display='none'; }
 
+// ===================== LOAD DATA =====================
 async function loadData(){
-  const [cs,vs,us]=await Promise.all([
+  const [cs,vs,us,ts]=await Promise.all([
     db.collection('clientes').orderBy('nome').get(),
     db.collection('visitas').get(),
-    db.collection('usuarios').where('role','==','assessor').get()
+    db.collection('usuarios').where('role','in',['assessor','gestor']).get(),
+    db.collection('tets').get()
   ]);
   allClients=cs.docs.map(d=>({id:d.id,...d.data()}));
   allVisits={};
   vs.docs.forEach(d=>{ const dt=d.data(); allVisits[dt.clienteId]={id:d.id,...dt}; });
-  allAssessores=us.docs.map(d=>({uid:d.id,...d.data()}));
+  allAssessores=us.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.role==='assessor');
+  allTets=ts.docs.map(d=>({id:d.id,...d.data()}));
 }
 
-// ===================== GESTOR =====================
-function renderGestor(){
+// ===================== ADMIN =====================
+function renderAdmin(){
   document.getElementById('main-content').innerHTML=`
     <div class="tabs">
-      <button class="tab active" id="tab-painel" onclick="switchTab('painel')">Painel</button>
-      <button class="tab" id="tab-divisao" onclick="switchTab('divisao')">Divisão da cidade</button>
-      <button class="tab" id="tab-clientes" onclick="switchTab('clientes')">Clientes</button>
-      <button class="tab" id="tab-config" onclick="switchTab('config')">Configurações</button>
+      <button class="tab active" id="tab-tets" onclick="switchAdminTab('tets')">TETs</button>
+      <button class="tab" id="tab-assessores" onclick="switchAdminTab('assessores')">Assessores</button>
+      <button class="tab" id="tab-atribuir" onclick="switchAdminTab('atribuir')">Atribuir TET</button>
     </div>
     <div id="tab-content"></div>`;
-  renderTabPainel();
+  renderAdminTets();
 }
 
-function switchTab(tab){
+function switchAdminTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='painel') renderTabPainel();
-  else if(tab==='divisao') renderTabDivisao();
-  else if(tab==='clientes') renderTabClientes();
-  else renderTabConfig();
+  if(tab==='tets') renderAdminTets();
+  else if(tab==='assessores') renderAdminAssessores();
+  else renderAdminAtribuir();
 }
 
-function renderTabPainel(){
-  const total=allClients.length, done=Object.keys(allVisits).length, pct=total?Math.round(done/total*100):0;
-  const aOpts='<option value="">Todos os assessores</option>'+allAssessores.map(a=>`<option value="${a.uid}">${a.nome}</option>`).join('');
-  document.getElementById('tab-content').innerHTML=`
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card"><div class="stat-label">Visitados</div><div class="stat-value green">${done}</div></div>
-      <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-value amber">${total-done}</div></div>
-    </div>
-    <p class="progress-label">${pct}% concluído</p>
-    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-    <div class="filter-row" style="margin-top:1.5rem">
-      <input type="text" id="s-search" placeholder="Buscar farmácia..." oninput="filterP()"/>
-      <select id="s-assessor" onchange="filterP()">${aOpts}</select>
-      <select id="s-div" onchange="filterP()"><option value="">Todas as divisões</option><option value="A">Divisão A</option><option value="B">Divisão B</option></select>
-      <select id="s-status" onchange="filterP()"><option value="">Todos os status</option><option value="done">Visitados</option><option value="pending">Pendentes</option></select>
-      <button class="btn-export" onclick="exportExcel()">⬇ Exportar Excel</button>
-    </div>
-    <div class="table-wrap"><table class="vtable">
-      <thead><tr><th>Farmácia</th><th>Divisão</th><th>Assessor</th><th>Responsável</th><th>Porte</th><th>Visita RCA</th><th>Acesso Online</th><th>Status</th></tr></thead>
-      <tbody id="ptbody">${buildRows(allClients)}</tbody>
-    </table></div>`;
-}
-
-function buildRows(clients){
-  if(!clients.length) return '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum resultado</td></tr>';
-  return clients.map(c=>{
-    const v=allVisits[c.id];
-    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'—':'—';
-    const dp=c.lado==='A'?'<span class="pill pill-a">A</span>':c.lado==='B'?'<span class="pill pill-b">B</span>':'—';
-    return`<tr>
-      <td><strong>${c.nome}</strong><br><span style="color:var(--text-muted);font-size:12px">${c.bairro||''} ${c.uf?'· '+c.uf:''}</span></td>
-      <td>${dp}</td><td>${an}</td>
-      <td>${v?v.responsavel||'—':'—'}</td>
-      <td>${v?v.porte||'—':'—'}</td>
-      <td style="font-size:13px">${v?v.visitaRca||'—':'—'}</td>
-      <td style="font-size:13px">${v?v.acessoOnline||'—':'—'}</td>
-      <td><span class="pill ${v?'pill-done':'pill-pending'}">${v?'Visitado':'Pendente'}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function filterP(){
-  const s=(document.getElementById('s-search')?.value||'').toLowerCase();
-  const af=document.getElementById('s-assessor')?.value||'';
-  const df=document.getElementById('s-div')?.value||'';
-  const sf=document.getElementById('s-status')?.value||'';
-  const f=allClients.filter(c=>{
-    if(s&&!c.nome.toLowerCase().includes(s)) return false;
-    if(df&&(c.lado||'')!==df) return false;
-    if(af&&c.assessorUid!==af) return false;
-    const v=allVisits[c.id];
-    if(sf==='done'&&!v) return false;
-    if(sf==='pending'&&v) return false;
-    return true;
-  });
-  document.getElementById('ptbody').innerHTML=buildRows(f);
-}
-
-function exportExcel(){
-  const rows=[['Código','Farmácia','Endereço','Bairro','Cidade','UF','CEP','Rede','Divisão','Assessor','Responsável','Telefone','Porte','Visita RCA','Acesso Online','Observações','Status','Data visita']];
-  allClients.forEach(c=>{
-    const v=allVisits[c.id];
-    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'':'';
-    const dt=v&&v.updatedAt?new Date(v.updatedAt.seconds*1000).toLocaleDateString('pt-BR'):'';
-    rows.push([
-      c.codigo||'', c.nome||'', c.endereco||'', c.bairro||'', c.cidade||'', c.uf||'', c.cep||'', c.rede||'',
-      c.lado||'', an,
-      v?v.responsavel||'':'', v?v.telefone||'':'', v?v.porte||'':'',
-      v?v.visitaRca||'':'', v?v.acessoOnline||'':'', v?v.obs||'':'',
-      v?'Visitado':'Pendente', dt
-    ]);
-  });
-  const ws=rows.map(r=>r.map(c=>{
-    const s=String(c);
-    return s.includes(',')||s.includes('"')?`"${s.replace(/"/g,'""')}"`:s;
-  }).join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+ws],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=`farmavisitas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
-  a.click(); URL.revokeObjectURL(url);
-}
-
-// ---- DIVISÃO DA CIDADE ----
-function renderTabDivisao(){
-  const cA=allClients.filter(c=>(c.lado||'')==='A');
-  const cB=allClients.filter(c=>(c.lado||'')==='B');
-  const cS=allClients.filter(c=>!c.lado);
-  const aOpts='<option value="">-- Selecionar assessor --</option>'+allAssessores.map(a=>`<option value="${a.uid}">${a.nome}</option>`).join('');
-  document.getElementById('tab-content').innerHTML=`
-    <div style="margin-bottom:1rem">
-      <p style="font-weight:600;font-size:16px">Divisão da cidade</p>
-      <p style="font-size:13px;color:var(--text-muted);margin-top:2px">Selecione a divisão e atribua um assessor responsável</p>
-    </div>
-    <div class="div-tabs">
-      <button class="div-tab act-a" id="dt-A" onclick="switchDT('A')">Divisão A <span style="font-size:12px;opacity:.8">(${cA.length})</span></button>
-      <button class="div-tab" id="dt-B" onclick="switchDT('B')">Divisão B <span style="font-size:12px;opacity:.8">(${cB.length})</span></button>
-      ${cS.length?`<button class="div-tab" id="dt-S" onclick="switchDT('S')">Sem divisão <span style="font-size:12px;opacity:.8">(${cS.length})</span></button>`:''}
-    </div>
-    <div id="assign-bar" class="assign-bar">
-      <label id="assign-label">Assessor responsável pela Divisão A:</label>
-      <select id="assign-select">${aOpts}</select>
-      <button class="btn-assign" onclick="assignDivisao()">Atribuir</button>
-    </div>
-    <div id="div-status" style="font-size:13px;margin-bottom:10px;min-height:20px"></div>
-    <div class="table-wrap"><table class="vtable">
-      <thead><tr><th>Farmácia</th><th>Bairro</th><th>Assessor atribuído</th><th>Status visita</th></tr></thead>
-      <tbody id="dtbody"></tbody>
-    </table></div>`;
-  window._curDT='A';
-  if(cA.length&&cA[0].assessorUid) document.getElementById('assign-select').value=cA[0].assessorUid;
-  renderDT('A');
-}
-
-function switchDT(d){
-  window._curDT=d;
-  document.querySelectorAll('.div-tab').forEach(t=>t.className='div-tab');
-  if(d==='A') document.getElementById('dt-A').className='div-tab act-a';
-  else if(d==='B') document.getElementById('dt-B').className='div-tab act-b';
-  else if(document.getElementById('dt-S')) document.getElementById('dt-S').className='div-tab act-s';
-  const bar=document.getElementById('assign-bar');
-  if(d==='S'){ bar.style.display='none'; }
-  else {
-    bar.style.display='flex';
-    document.getElementById('assign-label').textContent=`Assessor responsável pela Divisão ${d}:`;
-    const clients=allClients.filter(c=>(c.lado||'')===d);
-    document.getElementById('assign-select').value=clients.length&&clients[0].assessorUid?clients[0].assessorUid:'';
-  }
-  document.getElementById('div-status').innerHTML='';
-  renderDT(d);
-}
-
-function renderDT(d){
-  const clients=d==='S'?allClients.filter(c=>!c.lado):allClients.filter(c=>(c.lado||'')===d);
-  document.getElementById('dtbody').innerHTML=clients.map(c=>{
-    const v=allVisits[c.id];
-    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'—':'<span style="color:var(--text-muted)">Não atribuído</span>';
-    return`<tr><td><strong>${c.nome}</strong></td><td style="color:var(--text-muted)">${c.bairro||'—'}</td><td>${an}</td>
-    <td><span class="pill ${v?'pill-done':'pill-pending'}">${v?'Visitado':'Pendente'}</span></td></tr>`;
-  }).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhuma farmácia nesta divisão</td></tr>';
-}
-
-async function assignDivisao(){
-  const d=window._curDT; if(d==='S') return;
-  const assessorUid=document.getElementById('assign-select').value;
-  if(!assessorUid) return alert('Selecione um assessor.');
-  const clients=allClients.filter(c=>(c.lado||'')===d);
-  if(!clients.length){ document.getElementById('div-status').innerHTML='<span style="color:var(--amber)">Nenhuma farmácia nessa divisão.</span>'; return; }
-  document.getElementById('div-status').innerHTML=`<span style="color:var(--text-muted)">Atribuindo ${clients.length} farmácias...</span>`;
-  try{
-    for(let i=0;i<clients.length;i+=400){
-      const batch=db.batch();
-      clients.slice(i,i+400).forEach(c=>{ batch.update(db.collection('clientes').doc(c.id),{assessorUid}); c.assessorUid=assessorUid; });
-      await batch.commit();
-    }
-    const an=(allAssessores.find(a=>a.uid===assessorUid)||{}).nome||'';
-    document.getElementById('div-status').innerHTML=`<span style="color:var(--green)">✓ Divisão ${d} atribuída a <strong>${an}</strong> (${clients.length} farmácias)</span>`;
-    renderDT(d);
-  } catch(e){ document.getElementById('div-status').innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
-}
-
-// ---- CLIENTES ----
-function renderTabClientes(){
-  const semDiv=allClients.filter(c=>!c.lado).length;
+// ---- TETS ----
+function renderAdminTets(){
+  const tetOpts=allTets.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('');
   document.getElementById('tab-content').innerHTML=`
     <div class="config-area">
-      <div class="config-title">Importar lista de clientes (CSV)</div>
-      <div class="config-hint">Colunas: <strong>codigo, nome, endereco, bairro, cidade, uf, cep, rede, lado</strong><br>Separador vírgula ou ponto e vírgula.</div>
-      <input type="file" id="csv-file" accept=".csv" onchange="previewCSV()"/>
+      <div class="config-title">Criar novo TET</div>
+      <div class="config-hint">Um TET (Território) é uma carteira de clientes que será atribuída a um assessor.</div>
+      <label>Nome do TET</label><input type="text" id="tet-nome" placeholder="Ex: Osasco Centro, Osasco Oeste..."/>
+      <label>Cidade</label><input type="text" id="tet-cidade" placeholder="Ex: Osasco"/>
+      <label>Descrição (opcional)</label><input type="text" id="tet-desc" placeholder="Observações sobre o território"/>
+      <button class="btn-config" onclick="createTet()">Criar TET</button>
+      <div id="tet-status" class="status-msg"></div>
+    </div>
+
+    <div class="config-area">
+      <div class="config-title">Importar clientes para um TET (CSV)</div>
+      <div class="config-hint">Colunas: <strong>codigo, nome, endereco, bairro, cidade, uf, cep, rede</strong><br>Separador vírgula ou ponto e vírgula. Os clientes serão adicionados ao TET selecionado.</div>
+      <label>Selecionar TET</label>
+      <select id="import-tet-select"><option value="">-- Selecione o TET --</option>${tetOpts}</select>
+      <input type="file" id="csv-file" accept=".csv" style="margin-top:10px" onchange="previewCSV()"/>
       <div id="csv-preview" style="margin-top:10px"></div>
-      <div id="csv-status" style="margin-top:8px;font-size:13px"></div>
+      <div id="csv-status" class="status-msg"></div>
     </div>
+
     <div class="config-area">
-      <div class="config-title">Clientes cadastrados (${allClients.length})</div>
-      ${semDiv?`<p style="font-size:13px;color:var(--amber);margin-bottom:10px">⚠ ${semDiv} farmácias sem divisão definida.</p>`:''}
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input type="text" id="sc-search" placeholder="Buscar..." oninput="filterCL()"/>
-        <select id="sc-lado" onchange="filterCL()" style="width:auto"><option value="">Todas</option><option value="A">A</option><option value="B">B</option></select>
+      <div class="config-title">TETs cadastrados (${allTets.length})</div>
+      <div class="tet-grid">
+        ${allTets.length ? allTets.map(t=>{
+          const clients=allClients.filter(c=>c.tetId===t.id);
+          const done=clients.filter(c=>allVisits[c.id]).length;
+          const assessor=allAssessores.find(a=>a.uid===t.assessorUid);
+          return`<div class="tet-card">
+            <div class="tet-card-name">${t.nome}</div>
+            <div class="tet-card-meta">${t.cidade||''} ${t.desc?'· '+t.desc:''}</div>
+            <div class="tet-card-stats">
+              <span class="pill pill-tet">${clients.length} clientes</span>
+              <span class="pill pill-done">${done} visitados</span>
+              ${assessor?`<span class="pill" style="background:var(--amber-light);color:var(--amber)">${assessor.nome}</span>`:'<span class="pill pill-pending">Sem assessor</span>'}
+            </div>
+          </div>`;
+        }).join('') : '<div style="color:var(--text-muted);font-size:14px">Nenhum TET criado ainda.</div>'}
       </div>
-      <div id="cl-list" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">${renderCLHTML(allClients)}</div>
     </div>`;
 }
 
-function renderCLHTML(clients){
-  if(!clients.length) return '<div style="color:var(--text-muted);font-size:14px;padding:1rem">Nenhum resultado.</div>';
-  return clients.map(c=>`
-    <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-weight:500;font-size:14px">${c.nome}</div>
-        <div style="font-size:12px;color:var(--text-muted)">${c.codigo?'Cód: '+c.codigo+' · ':''}${c.bairro||''} ${c.uf?'· '+c.uf:''}</div>
-      </div>
-      ${c.lado?`<span class="pill ${c.lado==='A'?'pill-a':'pill-b'}">${c.lado}</span>`:'<span class="pill pill-pending">Sem div.</span>'}
-    </div>`).join('');
-}
-
-function filterCL(){
-  const s=(document.getElementById('sc-search')?.value||'').toLowerCase();
-  const l=document.getElementById('sc-lado')?.value||'';
-  const f=allClients.filter(c=>{
-    if(s&&!c.nome.toLowerCase().includes(s)) return false;
-    if(l&&(c.lado||'')!==l) return false;
-    return true;
-  });
-  document.getElementById('cl-list').innerHTML=renderCLHTML(f);
+async function createTet(){
+  const nome=document.getElementById('tet-nome').value.trim();
+  const cidade=document.getElementById('tet-cidade').value.trim();
+  const desc=document.getElementById('tet-desc').value.trim();
+  const st=document.getElementById('tet-status');
+  if(!nome) return st.innerHTML='<span style="color:var(--danger)">Informe o nome do TET.</span>';
+  st.innerHTML='<span style="color:var(--text-muted)">Criando...</span>';
+  try{
+    const ref=await db.collection('tets').add({nome,cidade,desc,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    allTets.push({id:ref.id,nome,cidade,desc});
+    st.innerHTML=`<span style="color:var(--green)">✓ TET <strong>${nome}</strong> criado!</span>`;
+    document.getElementById('tet-nome').value='';
+    document.getElementById('tet-cidade').value='';
+    document.getElementById('tet-desc').value='';
+    renderAdminTets();
+  } catch(e){ st.innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
 }
 
 function previewCSV(){
@@ -459,17 +339,17 @@ function previewCSV(){
       headers.forEach((h,i)=>obj[h]=(vals[i]||'').trim().replace(/"/g,''));
       return obj;
     }).filter(r=>r.nome);
-    const la=rows.filter(r=>(r.lado||'').toUpperCase()==='A').length;
-    const lb=rows.filter(r=>(r.lado||'').toUpperCase()==='B').length;
     document.getElementById('csv-preview').innerHTML=`
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${rows.length} clientes · Divisão A: ${la} · Divisão B: ${lb}</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${rows.length} clientes encontrados</p>
       <button class="btn-config" onclick='importCSV(${JSON.stringify(rows).replace(/'/g,"&#39;")})'>Importar ${rows.length} clientes</button>`;
   };
   reader.readAsText(file);
 }
 
 async function importCSV(rows){
-  if(!confirm(`Importar ${rows.length} clientes? Isso não apaga os existentes.`)) return;
+  const tetId=document.getElementById('import-tet-select').value;
+  if(!tetId) return alert('Selecione um TET antes de importar.');
+  if(!confirm(`Importar ${rows.length} clientes para este TET?`)) return;
   const status=document.getElementById('csv-status');
   status.innerHTML='<span style="color:var(--text-muted)">Importando...</span>';
   try{
@@ -479,7 +359,7 @@ async function importCSV(rows){
         batch.set(db.collection('clientes').doc(),{
           codigo:r.codigo||'', nome:r.nome||'', endereco:r.endereco||'',
           bairro:r.bairro||'', cidade:r.cidade||'', uf:(r.uf||'').toUpperCase(),
-          cep:r.cep||'', rede:r.rede||'', lado:(r.lado||'').toUpperCase()||null,
+          cep:r.cep||'', rede:r.rede||'', tetId,
           createdAt:firebase.firestore.FieldValue.serverTimestamp()
         });
       });
@@ -487,31 +367,34 @@ async function importCSV(rows){
     }
     await loadData();
     status.innerHTML=`<span style="color:var(--green)">✓ ${rows.length} clientes importados!</span>`;
-    renderTabClientes();
+    renderAdminTets();
   } catch(e){ status.innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
 }
 
-// ---- CONFIG ----
-function renderTabConfig(){
+// ---- ASSESSORES ----
+function renderAdminAssessores(){
   document.getElementById('tab-content').innerHTML=`
     <div class="config-area">
-      <div class="config-title">Cadastrar assessor</div>
+      <div class="config-title">Cadastrar novo assessor</div>
       <label>Nome</label><input type="text" id="nn" placeholder="Nome completo"/>
       <label>E-mail</label><input type="email" id="ne" placeholder="assessor@email.com"/>
       <label>Senha inicial</label><input type="password" id="np" placeholder="mínimo 6 caracteres"/>
       <button class="btn-config" onclick="createAssessor()">Cadastrar assessor</button>
-      <div id="cs" style="margin-top:10px;font-size:13px"></div>
+      <div id="cs" class="status-msg"></div>
     </div>
     <div class="config-area">
-      <div class="config-title">Assessores (${allAssessores.length})</div>
-      ${allAssessores.length?allAssessores.map(a=>`
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="config-title">Assessores cadastrados (${allAssessores.length})</div>
+      ${allAssessores.length ? allAssessores.map(a=>{
+        const tet=allTets.find(t=>t.assessorUid===a.uid);
+        const total=allClients.filter(c=>c.tetId===(tet?.id)).length;
+        const done=allClients.filter(c=>c.tetId===(tet?.id)&&allVisits[c.id]).length;
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <div><div style="font-weight:500">${a.nome}</div><div style="font-size:13px;color:var(--text-muted)">${a.email}</div></div>
-          <div style="display:flex;gap:6px">
-            <span class="pill pill-a">${allClients.filter(c=>c.assessorUid===a.uid&&c.lado==='A').length} farm. A</span>
-            <span class="pill pill-b">${allClients.filter(c=>c.assessorUid===a.uid&&c.lado==='B').length} farm. B</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${tet?`<span class="pill pill-tet">${tet.nome}</span><span class="pill pill-done">${done}/${total}</span>`:'<span class="pill pill-pending">Sem TET</span>'}
           </div>
-        </div>`).join(''):'<div style="color:var(--text-muted);font-size:14px">Nenhum assessor cadastrado.</div>'}
+        </div>`;
+      }).join('') : '<div style="color:var(--text-muted);font-size:14px">Nenhum assessor cadastrado.</div>'}
     </div>`;
 }
 
@@ -530,10 +413,222 @@ async function createAssessor(){
     const uid=cr.user.uid;
     await sa.signOut(); await sec.delete();
     await db.collection('usuarios').doc(uid).set({nome,email,role:'assessor',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    allAssessores.push({uid,nome,email});
+    allAssessores.push({uid,nome,email,role:'assessor'});
     st.innerHTML=`<span style="color:var(--green)">✓ Assessor <strong>${nome}</strong> cadastrado!</span>`;
     document.getElementById('nn').value=''; document.getElementById('ne').value=''; document.getElementById('np').value='';
+    renderAdminAssessores();
   } catch(e){ st.innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
+}
+
+// ---- ATRIBUIR TET ----
+function renderAdminAtribuir(){
+  const tetOpts='<option value="">-- Selecione o TET --</option>'+allTets.map(t=>`<option value="${t.id}">${t.nome} ${t.cidade?'('+t.cidade+')':''}</option>`).join('');
+  const assessorOpts='<option value="">-- Selecione o assessor --</option>'+allAssessores.map(a=>`<option value="${a.uid}">${a.nome}</option>`).join('');
+
+  document.getElementById('tab-content').innerHTML=`
+    <div class="config-area">
+      <div class="config-title">Atribuir TET a um assessor</div>
+      <div class="config-hint">O assessor verá apenas os clientes do TET atribuído a ele.</div>
+      <label>TET</label><select id="at-tet">${tetOpts}</select>
+      <label>Assessor</label><select id="at-assessor">${assessorOpts}</select>
+      <button class="btn-config" onclick="atribuirTet()">Atribuir</button>
+      <div id="at-status" class="status-msg"></div>
+    </div>
+
+    <div class="config-area">
+      <div class="config-title">Atribuições atuais</div>
+      <div class="table-wrap"><table class="vtable">
+        <thead><tr><th>TET</th><th>Cidade</th><th>Assessor</th><th>Clientes</th><th>Visitados</th></tr></thead>
+        <tbody>
+          ${allTets.map(t=>{
+            const assessor=allAssessores.find(a=>a.uid===t.assessorUid);
+            const clients=allClients.filter(c=>c.tetId===t.id);
+            const done=clients.filter(c=>allVisits[c.id]).length;
+            return`<tr>
+              <td><strong>${t.nome}</strong></td>
+              <td style="color:var(--text-muted)">${t.cidade||'—'}</td>
+              <td>${assessor?assessor.nome:'<span style="color:var(--text-muted)">Não atribuído</span>'}</td>
+              <td>${clients.length}</td>
+              <td><span class="pill pill-done">${done}</span></td>
+            </tr>`;
+          }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum TET criado</td></tr>'}
+        </tbody>
+      </table></div>
+    </div>`;
+}
+
+async function atribuirTet(){
+  const tetId=document.getElementById('at-tet').value;
+  const assessorUid=document.getElementById('at-assessor').value;
+  const st=document.getElementById('at-status');
+  if(!tetId||!assessorUid) return st.innerHTML='<span style="color:var(--danger)">Selecione o TET e o assessor.</span>';
+  st.innerHTML='<span style="color:var(--text-muted)">Atribuindo...</span>';
+  try{
+    await db.collection('tets').doc(tetId).update({assessorUid});
+    const tet=allTets.find(t=>t.id===tetId);
+    if(tet) tet.assessorUid=assessorUid;
+
+    // Update all clients in this TET
+    const clients=allClients.filter(c=>c.tetId===tetId);
+    for(let i=0;i<clients.length;i+=400){
+      const batch=db.batch();
+      clients.slice(i,i+400).forEach(c=>{ batch.update(db.collection('clientes').doc(c.id),{assessorUid}); c.assessorUid=assessorUid; });
+      await batch.commit();
+    }
+    const an=(allAssessores.find(a=>a.uid===assessorUid)||{}).nome||'';
+    const tn=tet?.nome||'';
+    st.innerHTML=`<span style="color:var(--green)">✓ TET <strong>${tn}</strong> atribuído a <strong>${an}</strong>!</span>`;
+    renderAdminAtribuir();
+  } catch(e){ st.innerHTML=`<span style="color:var(--danger)">Erro: ${e.message}</span>`; }
+}
+
+// ===================== GESTOR =====================
+function renderGestor(){
+  document.getElementById('main-content').innerHTML=`
+    <div class="tabs">
+      <button class="tab active" id="tab-painel" onclick="switchGestorTab('painel')">Painel</button>
+      <button class="tab" id="tab-tets-g" onclick="switchGestorTab('tets')">TETs</button>
+    </div>
+    <div id="tab-content"></div>`;
+  renderGestorPainel();
+}
+
+function switchGestorTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+(tab==='tets'?'tets-g':tab)).classList.add('active');
+  if(tab==='painel') renderGestorPainel();
+  else renderGestorTets();
+}
+
+function renderGestorPainel(){
+  const ufs=[...new Set(allClients.map(c=>c.uf).filter(Boolean))].sort();
+  const ufOpts='<option value="">Todas as UFs</option>'+ufs.map(u=>`<option value="${u}">${u}</option>`).join('');
+  const aOpts='<option value="">Todos os assessores</option>'+allAssessores.map(a=>`<option value="${a.uid}">${a.nome}</option>`).join('');
+  const tetOpts='<option value="">Todos os TETs</option>'+allTets.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('');
+
+  document.getElementById('tab-content').innerHTML=`
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+      <p style="font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Filtrar resumo</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="f-uf" onchange="updateSummary()" style="flex:1;min-width:120px">${ufOpts}</select>
+        <select id="f-assessor-sum" onchange="updateSummary()" style="flex:1;min-width:160px">${aOpts}</select>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="sum-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Visitados</div><div class="stat-value green" id="sum-done">0</div></div>
+      <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-value amber" id="sum-pending">0</div></div>
+    </div>
+    <p class="progress-label" id="sum-pct">0% concluído</p>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="sum-bar" style="width:0%"></div></div>
+    <div class="filter-row" style="margin-top:1.5rem">
+      <input type="text" id="s-search" placeholder="Buscar farmácia..." oninput="filterGestor()"/>
+      <select id="s-tet" onchange="filterGestor()">${tetOpts}</select>
+      <select id="s-assessor" onchange="filterGestor()">${aOpts}</select>
+      <select id="s-status" onchange="filterGestor()"><option value="">Todos os status</option><option value="done">Visitados</option><option value="pending">Pendentes</option></select>
+      <button class="btn-export" onclick="exportExcel()">⬇ Exportar</button>
+    </div>
+    <div class="table-wrap"><table class="vtable">
+      <thead><tr><th>Farmácia</th><th>TET</th><th>Assessor</th><th>Responsável</th><th>Porte</th><th>Visita RCA</th><th>Online</th><th>Status</th></tr></thead>
+      <tbody id="gtbody">${buildGestorRows(allClients)}</tbody>
+    </table></div>`;
+  updateSummary();
+}
+
+function updateSummary(){
+  const uf=document.getElementById('f-uf')?.value||'';
+  const assessor=document.getElementById('f-assessor-sum')?.value||'';
+  const filtered=allClients.filter(c=>{
+    if(uf&&(c.uf||'')!==uf) return false;
+    if(assessor&&c.assessorUid!==assessor) return false;
+    return true;
+  });
+  const total=filtered.length;
+  const done=filtered.filter(c=>allVisits[c.id]).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('sum-total').textContent=total;
+  document.getElementById('sum-done').textContent=done;
+  document.getElementById('sum-pending').textContent=total-done;
+  document.getElementById('sum-pct').textContent=`${pct}% concluído`;
+  document.getElementById('sum-bar').style.width=`${pct}%`;
+}
+
+function buildGestorRows(clients){
+  if(!clients.length) return '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum resultado</td></tr>';
+  return clients.map(c=>{
+    const v=allVisits[c.id];
+    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'—':'—';
+    const tet=c.tetId?(allTets.find(t=>t.id===c.tetId)||{}).nome||'—':'—';
+    return`<tr>
+      <td><strong>${c.nome}</strong><br><span style="color:var(--text-muted);font-size:12px">${c.bairro||''} ${c.uf?'· '+c.uf:''}</span></td>
+      <td><span class="pill pill-tet">${tet}</span></td>
+      <td>${an}</td>
+      <td>${v?v.responsavel||'—':'—'}</td>
+      <td>${v?v.porte||'—':'—'}</td>
+      <td style="font-size:13px">${v?v.visitaRca||'—':'—'}</td>
+      <td style="font-size:13px">${v?v.acessoOnline||'—':'—'}</td>
+      <td><span class="pill ${v?'pill-done':'pill-pending'}">${v?'Visitado':'Pendente'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterGestor(){
+  const s=(document.getElementById('s-search')?.value||'').toLowerCase();
+  const tf=document.getElementById('s-tet')?.value||'';
+  const af=document.getElementById('s-assessor')?.value||'';
+  const sf=document.getElementById('s-status')?.value||'';
+  const f=allClients.filter(c=>{
+    if(s&&!c.nome.toLowerCase().includes(s)) return false;
+    if(tf&&c.tetId!==tf) return false;
+    if(af&&c.assessorUid!==af) return false;
+    const v=allVisits[c.id];
+    if(sf==='done'&&!v) return false;
+    if(sf==='pending'&&v) return false;
+    return true;
+  });
+  document.getElementById('gtbody').innerHTML=buildGestorRows(f);
+}
+
+function renderGestorTets(){
+  document.getElementById('tab-content').innerHTML=`
+    <div class="tet-grid">
+      ${allTets.length ? allTets.map(t=>{
+        const clients=allClients.filter(c=>c.tetId===t.id);
+        const done=clients.filter(c=>allVisits[c.id]).length;
+        const pct=clients.length?Math.round(done/clients.length*100):0;
+        const assessor=allAssessores.find(a=>a.uid===t.assessorUid);
+        return`<div class="tet-card">
+          <div class="tet-card-name">${t.nome}</div>
+          <div class="tet-card-meta">${t.cidade||''}</div>
+          <div style="margin:8px 0">
+            <div class="progress-label">${pct}% · ${done}/${clients.length}</div>
+            <div class="progress-bar-wrap" style="margin-bottom:0"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+          </div>
+          <div class="tet-card-stats">
+            ${assessor?`<span class="pill" style="background:var(--amber-light);color:var(--amber)">${assessor.nome}</span>`:'<span class="pill pill-pending">Sem assessor</span>'}
+          </div>
+        </div>`;
+      }).join('') : '<div class="empty-state">Nenhum TET cadastrado ainda.</div>'}
+    </div>`;
+}
+
+function exportExcel(){
+  const rows=[['Código','Farmácia','Endereço','Bairro','Cidade','UF','CEP','Rede','TET','Assessor','Responsável','Telefone','Porte','Visita RCA','Acesso Online','Observações','Status','Data visita']];
+  allClients.forEach(c=>{
+    const v=allVisits[c.id];
+    const an=c.assessorUid?(allAssessores.find(a=>a.uid===c.assessorUid)||{}).nome||'':'';
+    const tet=c.tetId?(allTets.find(t=>t.id===c.tetId)||{}).nome||'':'';
+    const dt=v&&v.updatedAt?new Date(v.updatedAt.seconds*1000).toLocaleDateString('pt-BR'):'';
+    rows.push([c.codigo||'',c.nome||'',c.endereco||'',c.bairro||'',c.cidade||'',c.uf||'',c.cep||'',c.rede||'',
+      tet,an,v?v.responsavel||'':'',v?v.telefone||'':'',v?v.porte||'':'',
+      v?v.visitaRca||'':'',v?v.acessoOnline||'':'',v?v.obs||'':'',v?'Visitado':'Pendente',dt]);
+  });
+  const ws=rows.map(r=>r.map(c=>{const s=String(c);return s.includes(',')||s.includes('"')?`"${s.replace(/"/g,'""')}"`:s;}).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+ws],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`farmavisitas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
 // ===================== ASSESSOR =====================
@@ -542,12 +637,12 @@ function renderAssessorList(){
   const done=my.filter(c=>allVisits[c.id]).length;
   const total=my.length;
   const pct=total?Math.round(done/total*100):0;
-  const lado=my.length?my[0].lado:'?';
+  const tet=my.length?(allTets.find(t=>t.id===my[0].tetId)||{}).nome||'—':'—';
   window._myClients=my;
   document.getElementById('main-content').innerHTML=`
     <div style="margin-bottom:1rem">
-      <p style="font-weight:600;font-size:16px">Minha base — Divisão ${lado}</p>
-      <p class="progress-label" style="margin-top:.5rem">${done} de ${total} farmácias visitadas</p>
+      <p style="font-weight:600;font-size:16px">Meu Território — <span class="pill pill-tet">${tet}</span></p>
+      <p class="progress-label" style="margin-top:.75rem">${done} de ${total} farmácias visitadas</p>
       <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
     </div>
     <div style="margin-bottom:.75rem"><input type="text" placeholder="Buscar farmácia..." oninput="filterAL(this.value)"/></div>
@@ -555,7 +650,7 @@ function renderAssessorList(){
 }
 
 function renderALHTML(clients){
-  if(!clients.length) return '<div class="empty-state">Nenhuma farmácia atribuída a você ainda.<br>Aguarde o gestor fazer a distribuição.</div>';
+  if(!clients.length) return '<div class="empty-state">Nenhuma farmácia atribuída a você ainda.<br>Aguarde o admin fazer a distribuição.</div>';
   return clients.map(c=>{
     const v=allVisits[c.id];
     const meta=v?`${v.responsavel||''} · Porte ${v.porte||'?'}`:c.bairro||c.cidade||'';
@@ -576,19 +671,17 @@ function openClient(id){
   window._selectedSize=v.porte||null;
   window._selectedRca=v.visitaRca||null;
   window._selectedOnline=v.acessoOnline||null;
-
   const rcaOpts=['Visita semanal','Visita por quinzena','Visita mensal','Não conhece o RCA','Somente WhatsApp'];
   const onlineOpts=['Site','Televendas app','Não tem'];
-
   document.getElementById('main-content').innerHTML=`
     <button class="back-btn" onclick="renderAssessorList()">← Voltar</button>
     <div class="detail-name">${c.nome}</div>
     <div class="detail-info">
-      ${c.codigo?`<div class="detail-info-row"><span class="detail-info-label">Código</span><span class="detail-info-value">${c.codigo}</span></div>`:''}
-      ${c.endereco?`<div class="detail-info-row"><span class="detail-info-label">Endereço</span><span class="detail-info-value">${c.endereco}</span></div>`:''}
-      <div class="detail-info-row"><span class="detail-info-label">Bairro</span><span class="detail-info-value">${c.bairro||'—'} ${c.cidade?'· '+c.cidade:''} ${c.uf?'· '+c.uf:''}</span></div>
-      ${c.cep?`<div class="detail-info-row"><span class="detail-info-label">CEP</span><span class="detail-info-value">${c.cep}</span></div>`:''}
-      ${c.rede?`<div class="detail-info-row"><span class="detail-info-label">Rede</span><span class="detail-info-value">${c.rede}</span></div>`:''}
+      ${c.codigo?`<div class="detail-info-row"><span class="detail-info-label">Código</span><span>${c.codigo}</span></div>`:''}
+      ${c.endereco?`<div class="detail-info-row"><span class="detail-info-label">Endereço</span><span>${c.endereco}</span></div>`:''}
+      <div class="detail-info-row"><span class="detail-info-label">Bairro</span><span>${c.bairro||'—'} ${c.cidade?'· '+c.cidade:''} ${c.uf?'· '+c.uf:''}</span></div>
+      ${c.cep?`<div class="detail-info-row"><span class="detail-info-label">CEP</span><span>${c.cep}</span></div>`:''}
+      ${c.rede?`<div class="detail-info-row"><span class="detail-info-label">Rede</span><span>${c.rede}</span></div>`:''}
     </div>
     <div class="form-card">
       <div class="form-row">
@@ -613,10 +706,8 @@ function openClient(id){
 
 function selSz(el,s){ window._selectedSize=s; document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
 function selOpt(el,type,val){
-  if(type==='rca') window._selectedRca=val;
-  else window._selectedOnline=val;
-  const grid=el.parentElement;
-  grid.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('sel'));
+  if(type==='rca') window._selectedRca=val; else window._selectedOnline=val;
+  el.parentElement.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');
 }
 
